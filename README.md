@@ -4,6 +4,8 @@ Restore a damaged (truncated) mp4, m4v, mov, 3gp video. Provided you have a simi
 
 VideoRepair is a modern web application wrapper around the powerful [Untrunc](https://github.com/anthwlock/untrunc) C++ engine. It takes the complexity out of command-line video recovery, providing an intuitive, premium interface to quickly salvage corrupted video data locally and securely.
 
+![VideoRepair Web Interface](assets/images/screenshot1.png)
+
 ## You need:
 - Another video file (taken from the same camera/app) which isn't broken
 - Node.js (v18+) and npm installed
