@@ -1,8 +1,6 @@
 # VideoRepair (Powered by Untrunc)
 
-Restore a damaged (truncated) mp4, m4v, mov, 3gp video. Provided you have a similar not broken video. And some luck. Also works the same way with audio like m4a.
-
-VideoRepair is a modern web application wrapper around the powerful [Untrunc](https://github.com/anthwlock/untrunc) C++ engine. It takes the complexity out of command-line video recovery, providing an intuitive, premium interface to quickly salvage corrupted video data locally and securely.
+A secure, locally-hosted video repair tool. VideoRepair provides a modern, responsive web GUI for the Untrunc C++ engine, allowing you to easily recover damaged MP4/MOV/M4V/3GP files without uploading sensitive media to the cloud. Features an AI Repair Advisor.
 
 ![VideoRepair Web Interface](assets/images/screenshot1.png)
 
