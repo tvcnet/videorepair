@@ -84,6 +84,9 @@ That's it, you're done!
 
 **💡 Pro Tip:** The fastest way to get started is to simply ask your built-in **Antigravity AI Agent** to install the dependencies, compile the local engine, and launch the application in your browser automatically.
 
+> **Copy & Paste this prompt to your AI Agent:**
+> "Please help me set up the VideoRepair application in this workspace. Review `README.md` for compilation instructions specific to my OS. Install the necessary Node.js dependencies in the root directory, compile the `untrunc` C++ engine located in `untrunc-master`, start the local development server, and then verify the application loads correctly at `localhost:3000` in the browser."
+
 ## Help/Support
 
 If you managed to recover your video smoothly, help us find time to keep working on this software and make other people happy. If you didn't, we are always trying to improve the underlying engine and app logic for new devices.
