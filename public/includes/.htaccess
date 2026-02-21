@@ -1,0 +1,4 @@
+# Prevent direct access to template include files
+<FilesMatch "\.html$">
+    Require all denied
+</FilesMatch>

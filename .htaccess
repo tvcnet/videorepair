@@ -1,0 +1,12 @@
+# 1. Disable Directory Listing globally
+Options All -Indexes
+
+# 2. Prevent access to hidden files and directories (e.g., .git, .env, .planning)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# 3. Prevent access to backend Node.js files and documentation
+<FilesMatch "^(package\.json|package-lock\.json|server\.js|README\.md|PROJECT\.md|TASK\.md)$">
+    Require all denied
+</FilesMatch>

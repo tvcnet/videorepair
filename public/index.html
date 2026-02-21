@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoRepair — Restore Corrupted Video Files</title>
+  <meta name="description"
+    content="Repair damaged MP4, MOV, M4V, and 3GP video files with an intuitive control panel using the powerful Untrunc engine. Recover your corrupted video clips locally and securely.">
+  <meta name="keywords"
+    content="video repair, mp4 repair, untrunc, corrupted video, fix mov file, video recovery, dji video repair, gopro video fix">
+  <meta name="author" content="Jim Walker">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Meta Tags -->
+  <meta property="og:title" content="VideoRepair — Restore Corrupted Video Files">
+  <meta property="og:description"
+    content="Repair damaged MP4, MOV, M4V, and 3GP video files with an intuitive control panel using the powerful Untrunc engine.">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="VideoRepair — Restore Corrupted Video Files">
+  <meta name="twitter:description"
+    content="Repair damaged MP4, MOV, M4V, and 3GP video files with an intuitive control panel using the powerful Untrunc engine.">
+
+  <!-- AI & Search Engine Schema (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "VideoRepair",
+    "description": "Repair damaged MP4, MOV, M4V, and 3GP video files with an intuitive control panel using the powerful Untrunc engine.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Jim Walker",
+      "url": "https://www.reddit.com/user/hackrepair/"
+    },
+    "sponsor": {
+      "@type": "Organization",
+      "name": "TVCNet Website Hosting and Security Services",
+      "url": "https://tvcnet.com/"
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+  <!-- Background -->
+  <div class="bg-gradient" aria-hidden="true">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+  </div>
+
+  <div id="app">
+    <!-- Header -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Step 1: File Selection -->
+      <section class="panel panel-files" id="filesPanel">
+        <div class="panel-header">
+          <div class="step-badge">1</div>
+          <h2>Select Video Files</h2>
+        </div>
+        <div class="files-grid">
+          <!-- Reference Video -->
+          <div class="upload-card" id="referenceCard">
+            <div class="upload-zone" id="referenceZone" tabindex="0" role="button" aria-label="Upload reference video">
+              <input type="file" id="referenceInput" accept=".mp4,.m4v,.mov,.3gp,.m4a" hidden>
+              <div class="upload-zone-content" id="referenceContent">
+                <div class="upload-icon"><i class="fas fa-video"></i></div>
+                <h3>Reference Video</h3>
+                <p>A working video from the same camera</p>
+                <span class="upload-hint"><i class="fas fa-cloud-upload-alt"></i> Drop here or click to browse</span>
+              </div>
+              <div class="upload-zone-file hidden" id="referenceFile">
+                <div class="file-icon"><i class="fas fa-file-video"></i></div>
+                <div class="file-info">
+                  <span class="file-name" id="referenceName"></span>
+                  <span class="file-size" id="referenceSize"></span>
+                </div>
+                <button class="file-remove" id="referenceRemove" title="Remove file"><i
+                    class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Corrupt Video -->
+          <div class="upload-card" id="corruptCard">
+            <div class="upload-zone" id="corruptZone" tabindex="0" role="button" aria-label="Upload corrupt video">
+              <input type="file" id="corruptInput" accept=".mp4,.m4v,.mov,.3gp,.m4a" hidden>
+              <div class="upload-zone-content" id="corruptContent">
+                <div class="upload-icon icon-warning"><i class="fas fa-exclamation-triangle"></i></div>
+                <h3>Damaged Video</h3>
+                <p>The truncated or corrupted file to repair</p>
+                <span class="upload-hint"><i class="fas fa-cloud-upload-alt"></i> Drop here or click to browse</span>
+              </div>
+              <div class="upload-zone-file hidden" id="corruptFile">
+                <div class="file-icon file-icon-warning"><i class="fas fa-file-video"></i></div>
+                <div class="file-info">
+                  <span class="file-name" id="corruptName"></span>
+                  <span class="file-size" id="corruptSize"></span>
+                </div>
+                <button class="file-remove" id="corruptRemove" title="Remove file"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Repair Options -->
+      <section class="panel panel-options" id="optionsPanel">
+        <div class="panel-header collapsible" id="optionsToggle">
+          <div class="step-badge">2</div>
+          <h2>Repair Options</h2>
+          <button class="collapse-btn" aria-label="Toggle options"><i class="fas fa-chevron-down"></i></button>
+        </div>
+        <div class="options-body" id="optionsBody">
+          <div class="options-grid">
+            <label class="option-item" id="optSkipUnknown">
+              <input type="checkbox" name="skipUnknown" checked>
+              <span class="option-check"><i class="fas fa-check"></i></span>
+              <div class="option-info">
+                <span class="option-label">Skip Unknown Sequences <span class="tooltip"
+                    data-tooltip="Skips over corrupt byte blocks that don't match the expected NAL structure. Use this if the repair stalls or errors out early."><i
+                      class="fas fa-info-circle"></i></span></span>
+                <span class="option-desc">Step through unrecognized byte sequences</span>
+              </div>
+            </label>
+            <label class="option-item" id="optStretchVideo">
+              <input type="checkbox" name="stretchVideo">
+              <span class="option-check"><i class="fas fa-check"></i></span>
+              <div class="option-info">
+                <span class="option-label">Stretch Video <span class="tooltip"
+                    data-tooltip="Stretches or shrinks the video tracks to match the audio duration. Helpful for fixing sync issues at the end of the file."><i
+                      class="fas fa-info-circle"></i></span></span>
+                <span class="option-desc">Match video duration to audio (beta)</span>
+              </div>
+            </label>
+            <label class="option-item" id="optKeepUnknown">
+              <input type="checkbox" name="keepUnknown">
+              <span class="option-check"><i class="fas fa-check"></i></span>
+              <div class="option-info">
+                <span class="option-label">Keep Unknown Data <span class="tooltip"
+                    data-tooltip="Includes data blocks that weren't recognized during the repair in the final output. Useful for salvaging non-standard metadata."><i
+                      class="fas fa-info-circle"></i></span></span>
+                <span class="option-desc">Don't exclude unrecognized sequences</span>
+              </div>
+            </label>
+            <label class="option-item" id="optSearchMdat">
+              <input type="checkbox" name="searchMdat" checked>
+              <span class="option-check"><i class="fas fa-check"></i></span>
+              <div class="option-info">
+                <span class="option-label">Search for mdat <span class="tooltip"
+                    data-tooltip="Forcing a deep scan for the 'mdat' (media data) atom even if the file header is completely missing. Essential for severely damaged files."><i
+                      class="fas fa-info-circle"></i></span></span>
+                <span class="option-desc">Scan even if no MP4 structure found</span>
+              </div>
+            </label>
+            <label class="option-item" id="optNoCTTS">
+              <input type="checkbox" name="noCTTS">
+              <span class="option-check"><i class="fas fa-check"></i></span>
+              <div class="option-info">
+                <span class="option-label">No CTTS Restore <span class="tooltip"
+                    data-tooltip="Disables restoration of the composition time offset table. Try this if the fixed video has jittery playback or out-of-order frames."><i
+                      class="fas fa-info-circle"></i></span></span>
+                <span class="option-desc">Skip composition time offset table</span>
+              </div>
+            </label>
+            <label class="option-item" id="optDynStats">
+              <input type="checkbox" name="dynamicStats" checked>
+              <span class="option-check"><i class="fas fa-check"></i></span>
+              <div class="option-info">
+                <span class="option-label">Dynamic Statistics <span class="tooltip"
+                    data-tooltip="Sample statistics are calculated dynamically from the reference file during repair. Improves success rates for DJI and GoPro files."><i
+                      class="fas fa-info-circle"></i></span></span>
+                <span class="option-desc">Use dynamic sample statistics during repair</span>
+              </div>
+            </label>
+          </div>
+          <div class="option-extra">
+            <label class="step-size-label">
+              <span>Step Size <span class="tooltip"
+                  data-tooltip="The chunk size (in bytes) used to scan the corrupt file. Higher values are faster; lower values are more thorough but slower."><i
+                    class="fas fa-info-circle"></i></span></span>
+              <input type="number" id="stepSizeInput" class="input-field" min="0" value="0" placeholder="0 = auto">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Assistant -->
+      <section class="panel panel-ai" id="aiPanel">
+        <div class="panel-header">
+          <div class="step-badge ai-badge"><i class="fas fa-robot"></i></div>
+          <h2>Repair Advisor <span class="tooltip"
+              data-tooltip="Describe your video problem to generate a technical brief for your favorite AI assistant."><i
+                class="fas fa-info-circle"></i></span></h2>
+        </div>
+        <div class="ai-body">
+          <p class="ai-intro">Not sure which options to choose? Describe your video problem, and we'll generate a custom
+            technical brief for your personal AI Assistant (like Google Gemini) to analyze.</p>
+          <div class="ai-input-group">
+            <textarea id="aiProblemInput" class="ai-textarea"
+              placeholder="e.g., My drone crashed while recording, and the file won't open. The repair starts but then says 'buffer exceeded' and hangs."></textarea>
+          </div>
+          <div class="ai-actions">
+            <button class="btn btn-ai" id="consultGeminiBtn">
+              <span class="btn-icon"><i class="fas fa-sparkles"></i></span>
+              <span class="btn-label">Copy Brief to Your Favorite LLM</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Action Bar -->
+      <div class="action-bar" id="actionBar">
+        <button class="btn btn-repair" id="repairBtn" disabled>
+          <span class="btn-icon"><i class="fas fa-wrench"></i></span>
+          <span class="btn-label">Start Repair</span>
+        </button>
+        <button class="btn btn-cancel hidden" id="cancelBtn">
+          <span class="btn-icon"><i class="fas fa-stop"></i></span>
+          <span class="btn-label">Cancel</span>
+        </button>
+      </div>
+
+      <!-- Progress & Log -->
+      <section class="panel panel-progress hidden" id="progressPanel">
+        <div class="panel-header">
+          <div class="step-badge step-active">3</div>
+          <h2 id="progressTitle">Repairing...</h2>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <span class="progress-text" id="progressText">0%</span>
+        </div>
+        <div class="terminal" id="terminal">
+          <div class="terminal-header">
+            <span class="terminal-dots"><i></i><i></i><i></i></span>
+            <span class="terminal-title">Output Log</span>
+          </div>
+          <div class="terminal-body" id="terminalBody"></div>
+        </div>
+      </section>
+
+      <!-- Preview -->
+      <section class="panel panel-preview hidden" id="previewPanel">
+        <div class="panel-header">
+          <div class="step-badge step-complete"><i class="fas fa-check"></i></div>
+          <h2>Repair Complete</h2>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-card">
+            <h3><i class="fas fa-video"></i> Reference</h3>
+            <video id="refVideo" controls preload="metadata"></video>
+          </div>
+          <div class="preview-card">
+            <h3><i class="fas fa-magic"></i> Repaired</h3>
+            <video id="repairedVideo" controls preload="metadata"></video>
+          </div>
+        </div>
+        <div class="preview-actions">
+          <a class="btn btn-download" id="downloadBtn" download>
+            <i class="fas fa-download"></i> Download Repaired Video
+          </a>
+          <button class="btn btn-secondary" id="newRepairBtn">
+            <i class="fas fa-redo"></i> New Repair
+          </button>
+        </div>
+        <div class="repair-stats" id="repairStats"></div>
+      </section>
+
+    </main>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/js/templates.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+
+</html>
