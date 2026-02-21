@@ -1,0 +1,15 @@
+# Ignore IDE and OS files
+.DS_Store
+videorepair.code-workspace
+
+# Ignore node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore environment variables
+.env
+
+# Ignore planning directory (confidential)
+.planning/
