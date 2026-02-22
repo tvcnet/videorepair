@@ -1,8 +1,8 @@
-# VideoRepair (Powered by Untrunc)
+# VideoRepair Pro (Powered by Untrunc)
 
-A secure, locally-hosted video repair tool. VideoRepair provides a modern, responsive web GUI for the Untrunc C++ engine, allowing you to easily recover damaged MP4/MOV/M4V/3GP files without uploading sensitive media to the cloud. Features an AI Repair Advisor.
+A secure, locally-hosted video repair tool. VideoRepair Pro provides a modern, responsive web GUI for the Untrunc C++ engine, allowing you to easily recover damaged MP4/MOV/M4V/3GP files without uploading sensitive media to the cloud. Features an AI Repair Advisor.
 
-![VideoRepair Web Interface](assets/images/screenshot1.png)
+![VideoRepair Pro Web Interface](assets/images/screenshot1.png)
 
 ## You need:
 - Another video file (taken from the same camera/app) which isn't broken
@@ -26,7 +26,10 @@ npm install
 ```
 3. **Compile the `untrunc` C++ Engine Video Processing Binary**
 
-VideoRepair utilizes a high-performance C++ backend engine called `untrunc` that must be compiled on your specific machine for optimal performance.
+**Step A. Install Dependencies**
+You will need `ffmpeg` libraries and a C++ compiler. 
+
+VideoRepair Pro utilizes a high-performance C++ backend engine called `untrunc` that must be compiled on your specific machine for optimal performance.
 
 **Step A. Install Dependencies**
 You will need `ffmpeg` libraries and a C++ compiler. 
@@ -85,7 +88,7 @@ That's it, you're done!
 **💡 Pro Tip:** The fastest way to get started is to simply ask your built-in **Antigravity AI Agent** to install the dependencies, compile the local engine, and launch the application in your browser automatically.
 
 > **Copy & Paste this prompt to your AI Agent:**
-> "Please help me set up the VideoRepair application in this workspace. Review `README.md` for compilation instructions specific to my OS. Install the necessary Node.js dependencies in the root directory, compile the `untrunc` C++ engine located in `untrunc-master`, start the local development server, and then verify the application loads correctly at `localhost:3000` in the browser."
+> "Please help me set up the VideoRepair Pro application in this workspace. Review `README.md` for compilation instructions specific to my OS. Install the necessary Node.js dependencies in the root directory, compile the `untrunc` C++ engine located in `untrunc-master`, start the local development server, and then verify the application loads correctly at `localhost:3000` in the browser."
 
 ## Help/Support
 

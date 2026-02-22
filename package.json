@@ -1,6 +1,6 @@
 {
-  "name": "videorepair",
-  "version": "1.0.0",
+  "name": "videorepairpro",
+  "version": "2.0.0",
   "description": "Video Repair Control Panel powered by Untrunc",
   "main": "server.js",
   "scripts": {

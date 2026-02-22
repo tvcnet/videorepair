@@ -1,8 +1,8 @@
 /* ==============================================
-   VideoRepair Control Panel — Application Logic
+   VideoRepair Pro Control Panel — Application Logic
    ============================================== */
 
-class VideoRepairApp {
+class VideoRepairProApp {
     constructor() {
         this.referenceFile = null;
         this.corruptFile = null;
@@ -394,7 +394,7 @@ class VideoRepairApp {
 MY SPECIFIC PROBLEM:
 "${userProblem}"
 
-I have a working reference file from the same camera/setting. My repair tool (VideoRepair) provides the following 7 technical options. 
+I have a working reference file from the same camera/setting. My repair tool (VideoRepair Pro) provides the following 7 technical options. 
 
 Please analyze my problem and recommend the best combination of these settings:
 
@@ -440,5 +440,5 @@ Based on my description, what specific combination should I try? Provide a techn
 
 // Launch
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new VideoRepairApp();
+    window.app = new VideoRepairProApp();
 });

@@ -256,7 +256,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  🔧 VideoRepair Control Panel`);
+  console.log(`\n  🔧 VideoRepair Pro Control Panel`);
   console.log(`  ────────────────────────────`);
   console.log(`  → http://localhost:${PORT}\n`);
   console.log(`  Untrunc: ${fs.existsSync(UNTRUNC_BIN) ? '✅ Available' : '❌ Not built'}`);
