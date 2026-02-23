@@ -4,6 +4,21 @@ A secure, locally-hosted video repair tool. VideoRepair Pro provides a modern, r
 
 ![VideoRepair Pro Web Interface](assets/images/screenshot1.png)
 
+## Download the Mac App (Recommended)
+
+If you are a macOS user and just want the clickable app:
+
+- Go to the **GitHub Releases** page: [Latest Release](https://github.com/tvcnet/videorepair/releases/latest)
+- Download the macOS installer assets (`.dmg` or `.zip`) from the release
+
+Important:
+- **GitHub `Code` -> `Download ZIP` is source code only**, not the installable Mac application.
+- The packaged Mac app is distributed only through the **Releases** page assets.
+
+Current packaged builds:
+- Apple Silicon (`arm64`) macOS `.dmg` / `.zip` are published in the latest release.
+- If macOS warns that the app is from an unidentified developer, use **Right-click -> Open** the first time.
+
 ## You need:
 - Another video file (taken from the same camera/app) which isn't broken
 - Node.js (v18+) and npm installed
