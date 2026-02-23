@@ -128,9 +128,14 @@ app.post('/api/repair', (req, res) => {
     outputBuf = lines.pop() || '';
     for (const line of lines) {
       if (!line.trim()) continue;
+      const trimmedLine = line.trim();
       const progressMatch = line.match(/(\d+(?:\.\d+)?)\s*%/);
       if (progressMatch) { job.progress = parseFloat(progressMatch[1]); }
-      const entry = { time: new Date().toISOString(), text: line.trim(), type: isErr ? 'error' : (line.includes('Warning') ? 'warning' : 'info') };
+      const saveMatch = trimmedLine.match(/^Info:\s+saving\s+(.+)$/);
+      if (saveMatch) {
+        job.savedOutputPath = saveMatch[1].trim();
+      }
+      const entry = { time: new Date().toISOString(), text: trimmedLine, type: isErr ? 'error' : (line.includes('Warning') ? 'warning' : 'info') };
       job.logs.push(entry);
       job.listeners.forEach(cb => cb({ event: 'log', data: entry }));
       if (progressMatch) { job.listeners.forEach(cb => cb({ event: 'progress', data: { percent: job.progress } })); }
@@ -141,20 +146,49 @@ app.post('/api/repair', (req, res) => {
   proc.stderr.on('data', d => processOutput(d, true));
 
   proc.on('close', code => {
-    // Find the repaired file
     const corBase = path.basename(corPath, path.extname(corPath));
     const ext = path.extname(corPath);
-    const fixedName = `${corBase}_fixed${ext}`;
-    const fixedPath = path.join(TEMP_DIR, fixedName);
+    const defaultFixedPath = path.join(TEMP_DIR, `${corBase}_fixed${ext}`);
 
-    if (code === 0 && fs.existsSync(fixedPath)) {
-      const stat = fs.statSync(fixedPath);
+    let repairedPath = '';
+    const candidatePaths = [];
+    if (job.savedOutputPath) candidatePaths.push(job.savedOutputPath);
+    candidatePaths.push(defaultFixedPath);
+
+    // untrunc can append option suffixes (e.g. *_fixed-s1-dyn.mp4)
+    try {
+      const prefix = `${corBase}_fixed`;
+      const tempCandidates = fs.readdirSync(TEMP_DIR)
+        .filter((name) => name.startsWith(prefix) && name.endsWith(ext))
+        .map((name) => path.join(TEMP_DIR, name))
+        .filter((fp) => {
+          try {
+            const st = fs.statSync(fp);
+            return st.isFile() && st.mtimeMs >= (job.startTime - 1000);
+          } catch (_) {
+            return false;
+          }
+        })
+        .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+      candidatePaths.push(...tempCandidates);
+    } catch (_) { }
+
+    repairedPath = candidatePaths.find((fp) => {
+      try { return !!fp && fs.existsSync(fp) && fs.statSync(fp).isFile(); }
+      catch (_) { return false; }
+    }) || '';
+
+    if (code === 0 && repairedPath) {
+      const stat = fs.statSync(repairedPath);
+      const fixedName = path.basename(repairedPath);
       job.status = 'complete';
-      job.result = { filename: fixedName, size: stat.size, path: `/api/stream?path=${encodeURIComponent(fixedPath)}` };
+      job.result = { filename: fixedName, size: stat.size, path: `/api/stream?path=${encodeURIComponent(repairedPath)}` };
       job.listeners.forEach(cb => cb({ event: 'complete', data: job.result }));
     } else {
       job.status = 'error';
-      job.error = `Process exited with code ${code}`;
+      job.error = code === 0
+        ? 'Repair process completed but output file could not be located'
+        : `Process exited with code ${code}`;
       job.listeners.forEach(cb => cb({ event: 'error', data: { message: job.error } }));
     }
     job.endTime = Date.now();
