@@ -4,6 +4,11 @@ All notable public releases for this repository are documented here.
 
 This changelog is intentionally public and release-focused. Internal planning notes remain local-only in `.planning/`.
 
+## Download the Mac App
+
+- macOS installers (`.dmg` / `.zip`) are published on the [Latest Release](https://github.com/tvcnet/videorepair/releases/latest).
+- GitHub `Code` -> `Download ZIP` is source code only (not the installable app).
+
 ## [2.0.1] - 2026-02-23
 
 First properly packaged macOS application release of VideoRepair Pro.
@@ -37,4 +42,3 @@ Initial public VideoRepair web application release (pre-Electron/mac packaging).
 - Node.js/Express web wrapper for `untrunc`.
 - Web UI flow for selecting reference/corrupt videos and starting repairs.
 - Basic repair orchestration and progress/status handling.
-
