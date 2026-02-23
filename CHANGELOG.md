@@ -9,6 +9,15 @@ This changelog is intentionally public and release-focused. Internal planning no
 - macOS installers (`.dmg` / `.zip`) are published on the [Latest Release](https://github.com/tvcnet/videorepair/releases/latest).
 - GitHub `Code` -> `Download ZIP` is source code only (not the installable app).
 
+## [2.0.3] - 2026-02-23
+
+Patch release for packaged macOS app repair-completion reliability.
+
+### Fixed
+- Packaged app backend now detects repaired output files when `untrunc` adds option suffixes (for example `*_fixed-dyn.mp4`) instead of assuming only `*_fixed.mp4`.
+- Backend now captures the actual `untrunc` save path from logs and returns the correct repaired file path to the UI.
+- Prevents false failure states where repair succeeded but the app reported an error after `untrunc` exited with code `0`.
+
 ## [2.0.2] - 2026-02-23
 
 Patch release for packaged macOS app repair-start reliability.
