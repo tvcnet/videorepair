@@ -96,16 +96,26 @@ class VideoRepairProApp {
     }
 
     async uploadFile(file, type) {
-        const zone = type === 'reference' ? this.refZone : this.corZone;
-        const contentEl = type === 'reference' ? this.refContent : this.corContent;
+        let absolutePath = '';
+        if (window.electronAPI && typeof window.electronAPI.getPathForFile === 'function') {
+            absolutePath = window.electronAPI.getPathForFile(file) || '';
+        }
 
-        // In a desktop environment, file.path contains the absolute path.
-        // We simulate a successful "upload" instantly.
+        // Fallback for older Electron/dev environments that still expose file.path.
+        if (!absolutePath && file.path) {
+            absolutePath = file.path;
+        }
+
+        if (!absolutePath) {
+            this.showToast('error', 'Could not access the selected file path. Please restart the app and try again.');
+            return;
+        }
+
         const fileData = {
-            filename: file.path || file.name, // Desktop absolute path
+            filename: absolutePath,
             originalname: file.name,
             size: file.size,
-            path: file.path || file.name
+            path: absolutePath
         };
 
         if (type === 'reference') {
@@ -226,6 +236,12 @@ class VideoRepairProApp {
             this.currentJobId = jobId;
             this.connectProgress(jobId);
         } catch (err) {
+            this.progressTitle.textContent = 'Repair Failed';
+            this.appendLog({
+                time: new Date().toISOString(),
+                type: 'error',
+                text: err.message
+            });
             this.showToast('error', err.message);
             this.repairBtn.classList.remove('hidden');
             this.cancelBtn.classList.add('hidden');

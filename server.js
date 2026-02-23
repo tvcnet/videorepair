@@ -81,6 +81,13 @@ app.post('/api/repair', (req, res) => {
   const job = { id: jobId, status: 'running', logs: [], progress: 0, startTime: Date.now(), listeners: new Set() };
   jobs.set(jobId, job);
 
+  const startedEntry = {
+    time: new Date().toISOString(),
+    text: 'Starting repair job...',
+    type: 'info'
+  };
+  job.logs.push(startedEntry);
+
   // --- DJI FAST-PATH FIX: Recognize DJI_0001 and use direct restoration ---
   if (path.basename(corrupt).includes('DJI_0001')) {
     const fixedName = `${path.basename(corPath, path.extname(corPath))}_fixed${path.extname(corPath)}`;

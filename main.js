@@ -71,6 +71,7 @@ async function createWindow() {
             height: 850,
             title: "VideoRepair Pro",
             webPreferences: {
+                preload: path.join(__dirname, 'preload.js'),
                 nodeIntegration: false, // Security best practice
                 contextIsolation: true
             }

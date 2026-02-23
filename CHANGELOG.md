@@ -9,6 +9,15 @@ This changelog is intentionally public and release-focused. Internal planning no
 - macOS installers (`.dmg` / `.zip`) are published on the [Latest Release](https://github.com/tvcnet/videorepair/releases/latest).
 - GitHub `Code` -> `Download ZIP` is source code only (not the installable app).
 
+## [2.0.2] - 2026-02-23
+
+Patch release for packaged macOS app repair-start reliability.
+
+### Fixed
+- Electron file selection path handling for modern Electron versions (uses a preload bridge instead of relying on deprecated/removed renderer `File.path` behavior).
+- Repair-start UX feedback so failed starts surface a visible error in the repair log/panel instead of appearing to hang at `0%`.
+- Added an immediate backend "Starting repair job..." log entry so long-running repairs do not look stalled before first progress output.
+
 ## [2.0.1] - 2026-02-23
 
 First properly packaged macOS application release of VideoRepair Pro.
