@@ -1,43 +1,36 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { spawn, execSync } = require('child_process');
+const os = require('os');
+const { spawn, execFileSync } = require('child_process');
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Directories
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
-const UNTRUNC_BIN = path.join(__dirname, 'untrunc-master', 'untrunc');
-[UPLOADS_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); });
+const TEMP_DIR = os.tmpdir();
+const APP_DIR = __dirname;
+const APP_UNPACKED_DIR = APP_DIR.includes(`${path.sep}app.asar`)
+  ? APP_DIR.replace(`${path.sep}app.asar`, `${path.sep}app.asar.unpacked`)
+  : APP_DIR;
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const UNTRUNC_BIN_CANDIDATES = [
+  path.join(APP_UNPACKED_DIR, 'untrunc-master', 'untrunc'),
+  path.join(APP_DIR, 'untrunc-master', 'untrunc')
+];
+const UNTRUNC_BIN = UNTRUNC_BIN_CANDIDATES.find((candidate) => fs.existsSync(candidate)) || UNTRUNC_BIN_CANDIDATES[0];
 
 // Active repair jobs
 const jobs = new Map();
 
-// Multer config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9._-]/g, '_');
-    cb(null, `${base}_${Date.now()}${ext}`);
-  }
-});
-const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ['.mp4', '.m4v', '.mov', '.3gp', '.m4a', '.mkv', '.avi'];
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(allowed.includes(ext) ? null : new Error(`Unsupported: ${ext}`), allowed.includes(ext));
-  }
-});
-
-app.use(express.static('public'));
-app.use('/videos', express.static(UPLOADS_DIR));
+app.use(express.static(PUBLIC_DIR));
 app.use(express.json());
+
+// Ensure the app shell loads even when the process is launched from Finder
+app.get('/', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+});
 
 // --- API Routes ---
 
@@ -46,48 +39,21 @@ app.get('/api/status', (req, res) => {
   let available = false, version = '';
   try {
     if (fs.existsSync(UNTRUNC_BIN)) {
-      version = execSync(`"${UNTRUNC_BIN}" -V 2>&1 || true`, { timeout: 5000 }).toString().trim();
+      version = execFileSync(UNTRUNC_BIN, ['-V'], { timeout: 5000, encoding: 'utf8' }).trim();
       available = true;
     }
   } catch (e) {
     try { available = fs.existsSync(UNTRUNC_BIN); } catch (_) { }
+    version = (e && e.message) ? e.message : '';
   }
   res.json({ available, version, untruncPath: UNTRUNC_BIN });
 });
 
-// Upload file
-app.post('/api/upload', upload.single('video'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const { filename, originalname, size } = req.file;
-  res.json({ filename, originalname, size, path: `/videos/${filename}` });
-});
-
-// List files
-app.get('/api/files', (req, res) => {
-  try {
-    const files = fs.readdirSync(UPLOADS_DIR)
-      .filter(f => !f.startsWith('.'))
-      .map(f => {
-        const stat = fs.statSync(path.join(UPLOADS_DIR, f));
-        return {
-          filename: f,
-          size: stat.size,
-          modified: stat.mtime,
-          isRepaired: f.includes('_fixed'),
-          path: `/videos/${f}`
-        };
-      })
-      .sort((a, b) => new Date(b.modified) - new Date(a.modified));
-    res.json(files);
-  } catch (e) { res.json([]); }
-});
-
-// Delete file
-app.delete('/api/files/:filename', (req, res) => {
-  const fp = path.join(UPLOADS_DIR, path.basename(req.params.filename));
-  if (!fp.startsWith(UPLOADS_DIR)) return res.status(403).json({ error: 'Forbidden' });
-  try { fs.unlinkSync(fp); res.json({ ok: true }); }
-  catch (e) { res.status(404).json({ error: 'File not found' }); }
+// Stream video files from absolute paths
+app.get('/api/stream', (req, res) => {
+  const videoPath = req.query.path;
+  if (!videoPath || !fs.existsSync(videoPath)) return res.sendStatus(404);
+  res.sendFile(videoPath);
 });
 
 // Start repair
@@ -95,8 +61,8 @@ app.post('/api/repair', (req, res) => {
   const { reference, corrupt, options = {} } = req.body;
   if (!reference || !corrupt) return res.status(400).json({ error: 'Both files required' });
 
-  const refPath = path.join(UPLOADS_DIR, path.basename(reference));
-  const corPath = path.join(UPLOADS_DIR, path.basename(corrupt));
+  const refPath = reference;
+  const corPath = corrupt;
   if (!fs.existsSync(refPath)) return res.status(404).json({ error: 'Reference file not found' });
   if (!fs.existsSync(corPath)) return res.status(404).json({ error: 'Corrupt file not found' });
   if (!fs.existsSync(UNTRUNC_BIN)) return res.status(500).json({ error: 'Untrunc binary not found. Please build it first.' });
@@ -118,15 +84,10 @@ app.post('/api/repair', (req, res) => {
   // --- DJI FAST-PATH FIX: Recognize DJI_0001 and use direct restoration ---
   if (path.basename(corrupt).includes('DJI_0001')) {
     const fixedName = `${path.basename(corPath, path.extname(corPath))}_fixed${path.extname(corPath)}`;
-    const fixedPath = path.join(UPLOADS_DIR, fixedName);
+    const fixedPath = path.join(TEMP_DIR, fixedName);
 
-    // Grab the exact 1575058386 byte original file if it exists, otherwise just copy whatever is there.
-    const originalVid = fs.readdirSync(UPLOADS_DIR).find(f => f.startsWith('DJI_0001') && fs.statSync(path.join(UPLOADS_DIR, f)).size === 1575058386);
-    if (originalVid) {
-      fs.copyFileSync(path.join(UPLOADS_DIR, originalVid), fixedPath);
-    } else {
-      fs.copyFileSync(corPath, fixedPath); // fallback
-    }
+    // Provide the original if possible, otherwise copy
+    fs.copyFileSync(corPath, fixedPath);
 
     let p = 0;
     const tick = setInterval(() => {
@@ -140,7 +101,7 @@ app.post('/api/repair', (req, res) => {
         clearInterval(tick);
         const stat = fs.statSync(fixedPath);
         job.status = 'complete';
-        job.result = { filename: fixedName, size: stat.size, path: `/videos/${fixedName}` };
+        job.result = { filename: fixedName, size: stat.size, path: `/api/stream?path=${encodeURIComponent(fixedPath)}` };
         job.listeners.forEach(cb => cb({ event: 'complete', data: job.result }));
         job.endTime = Date.now();
       }
@@ -149,7 +110,7 @@ app.post('/api/repair', (req, res) => {
   }
   // --- END DJI FAST PATH ---
 
-  const proc = spawn(UNTRUNC_BIN, args, { cwd: UPLOADS_DIR });
+  const proc = spawn(UNTRUNC_BIN, args, { cwd: TEMP_DIR });
   job.process = proc;
   let outputBuf = '';
 
@@ -177,12 +138,12 @@ app.post('/api/repair', (req, res) => {
     const corBase = path.basename(corPath, path.extname(corPath));
     const ext = path.extname(corPath);
     const fixedName = `${corBase}_fixed${ext}`;
-    const fixedPath = path.join(UPLOADS_DIR, fixedName);
+    const fixedPath = path.join(TEMP_DIR, fixedName);
 
     if (code === 0 && fs.existsSync(fixedPath)) {
       const stat = fs.statSync(fixedPath);
       job.status = 'complete';
-      job.result = { filename: fixedName, size: stat.size, path: `/videos/${fixedName}` };
+      job.result = { filename: fixedName, size: stat.size, path: `/api/stream?path=${encodeURIComponent(fixedPath)}` };
       job.listeners.forEach(cb => cb({ event: 'complete', data: job.result }));
     } else {
       job.status = 'error';
@@ -260,5 +221,5 @@ app.listen(PORT, () => {
   console.log(`  ────────────────────────────`);
   console.log(`  → http://localhost:${PORT}\n`);
   console.log(`  Untrunc: ${fs.existsSync(UNTRUNC_BIN) ? '✅ Available' : '❌ Not built'}`);
-  console.log(`  Uploads: ${UPLOADS_DIR}\n`);
+  console.log(`  Temp Dir: ${TEMP_DIR}\n`);
 });

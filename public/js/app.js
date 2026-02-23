@@ -99,63 +99,43 @@ class VideoRepairProApp {
         const zone = type === 'reference' ? this.refZone : this.corZone;
         const contentEl = type === 'reference' ? this.refContent : this.corContent;
 
-        // Show upload spinner
-        const overlay = document.createElement('div');
-        overlay.className = 'upload-progress';
-        overlay.innerHTML = '<div class="spinner"></div><span>Uploading...</span>';
-        zone.style.position = 'relative';
-        zone.appendChild(overlay);
+        // In a desktop environment, file.path contains the absolute path.
+        // We simulate a successful "upload" instantly.
+        const fileData = {
+            filename: file.path || file.name, // Desktop absolute path
+            originalname: file.name,
+            size: file.size,
+            path: file.path || file.name
+        };
 
-        const formData = new FormData();
-        formData.append('video', file);
-
-        try {
-            const resp = await fetch('/api/upload', { method: 'POST', body: formData });
-            if (!resp.ok) {
-                const err = await resp.json();
-                throw new Error(err.error || 'Upload failed');
-            }
-            const data = await resp.json();
-
-            if (type === 'reference') {
-                this.referenceFile = data;
-                this.refName.textContent = data.originalname;
-                this.refSize.textContent = this.formatSize(data.size);
-                this.refContent.classList.add('hidden');
-                this.refFileEl.classList.remove('hidden');
-                this.refZone.classList.add('has-file');
-            } else {
-                this.corruptFile = data;
-                this.corName.textContent = data.originalname;
-                this.corSize.textContent = this.formatSize(data.size);
-                this.corContent.classList.add('hidden');
-                this.corFileEl.classList.remove('hidden');
-                this.corZone.classList.add('has-file');
-            }
-
-            this.updateRepairButton();
-            this.showToast('success', `${file.name} uploaded successfully`);
-        } catch (err) {
-            this.showToast('error', err.message);
-        } finally {
-            overlay.remove();
+        if (type === 'reference') {
+            this.referenceFile = fileData;
+            this.refName.textContent = fileData.originalname;
+            this.refSize.textContent = this.formatSize(fileData.size);
+            this.refContent.classList.add('hidden');
+            this.refFileEl.classList.remove('hidden');
+            this.refZone.classList.add('has-file');
+        } else {
+            this.corruptFile = fileData;
+            this.corName.textContent = fileData.originalname;
+            this.corSize.textContent = this.formatSize(fileData.size);
+            this.corContent.classList.add('hidden');
+            this.corFileEl.classList.remove('hidden');
+            this.corZone.classList.add('has-file');
         }
+
+        this.updateRepairButton();
+        this.showToast('success', `${file.name} ready for processing`);
     }
 
     clearFile(type) {
         if (type === 'reference') {
-            if (this.referenceFile) {
-                fetch(`/api/files/${this.referenceFile.filename}`, { method: 'DELETE' }).catch(() => { });
-            }
             this.referenceFile = null;
             this.refContent.classList.remove('hidden');
             this.refFileEl.classList.add('hidden');
             this.refZone.classList.remove('has-file');
             this.refInput.value = '';
         } else {
-            if (this.corruptFile) {
-                fetch(`/api/files/${this.corruptFile.filename}`, { method: 'DELETE' }).catch(() => { });
-            }
             this.corruptFile = null;
             this.corContent.classList.remove('hidden');
             this.corFileEl.classList.add('hidden');
@@ -231,8 +211,8 @@ class VideoRepairProApp {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    reference: this.referenceFile.filename,
-                    corrupt: this.corruptFile.filename,
+                    reference: this.referenceFile.path,
+                    corrupt: this.corruptFile.path,
                     options: this.getOptions()
                 })
             });
@@ -303,7 +283,7 @@ class VideoRepairProApp {
 
         // Show preview
         this.previewPanel.classList.remove('hidden');
-        this.refVideo.src = this.referenceFile.path;
+        this.refVideo.src = `/api/stream?path=${encodeURIComponent(this.referenceFile.path)}`;
         this.repairedVideo.src = result.path;
         this.downloadBtn.href = result.path;
         this.downloadBtn.download = result.filename;
